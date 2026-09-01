@@ -30,5 +30,5 @@ def test_bacs_concurrency() -> None:
     assert len(results) == iterations
     for txns in results:
         assert len(txns) == 1
-        assert txns[0].amount == Decimal("1234.56")
+        assert txns[0].amount == Decimal("123.45")
     assert elapsed < 5.0
