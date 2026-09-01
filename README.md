@@ -1,47 +1,150 @@
-# BACS Standard 18 / Faster Payments Loader for Bank Statement Parser
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
 
-[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-Apache_2.0_OR_MIT-blue.svg)](LICENSE)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/sebastienrousseau/bankstatementparser-loader-bacs)
+<p align="center">
+  <img
+    src="https://cloudcdn.pro/bankstatementparser/v1/logos/bankstatementparser.svg"
+    alt="bankstatementparser-loader-bacs logo"
+    width="120"
+    height="120"
+  />
+</p>
 
-BACS Standard 18 (106-character / 100-character fixed width) and Faster Payments transmission file loader plugin for [`bankstatementparser`](https://github.com/sebastienrousseau/bankstatementparser).
+<h1 align="center">bankstatementparser-loader-bacs</h1>
+
+<p align="center">
+  <b>UK BACS Standard 18 / Faster Payments 106-byte fixed-width loader plugin for bankstatementparser.</b>
+</p>
+
+<p align="center">
+  <a href="https://pypi.org/project/bankstatementparser-loader-bacs/"><img src="https://img.shields.io/pypi/v/bankstatementparser-loader-bacs?style=for-the-badge" alt="PyPI version" /></a>
+  <a href="https://pypi.org/project/bankstatementparser-loader-bacs/"><img src="https://img.shields.io/pypi/pyversions/bankstatementparser-loader-bacs.svg?style=for-the-badge" alt="Python versions" /></a>
+  <a href="https://pypi.org/project/bankstatementparser-loader-bacs/"><img src="https://img.shields.io/pypi/dm/bankstatementparser-loader-bacs.svg?style=for-the-badge" alt="PyPI downloads" /></a>
+  <a href="https://github.com/sebastienrousseau/bankstatementparser-loader-bacs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/bankstatementparser-loader-bacs/ci.yml?branch=main&label=Tests&style=for-the-badge" alt="Tests" /></a>
+  <a href="#license"><img src="https://img.shields.io/pypi/l/bankstatementparser-loader-bacs?style=for-the-badge" alt="License" /></a>
+</p>
 
 ---
 
-## Features
+## Contents
 
-- **BACS Standard 18 Parser**: Supports full UK BACS file structure (`VOL1`, `HDR1`, `UHL1`, Standard 18 details, `EOF1`, `UTL1`).
-- **Direct Debit & Direct Credit**: Correctly decodes transaction codes (`99` Direct Credit, `01`/`17`/`18`/`19` Direct Debit) and calculates signed transaction amounts in GBP.
-- **Julian & Gregorian Date Support**: Supports 5-digit Julian dates (`YYDDD`) and Gregorian formats (`DDMMYY`, `YYMMDD`).
-- **Seamless Plugin Integration**: Dynamically registers under `bankstatementparser.loaders` entry points (`bacs`, `std18`).
+- [What is bankstatementparser-loader-bacs?](#what-is-bankstatementparser-loader-bacs) — the problem it solves
+- [Install](#install) — PyPI, virtualenv
+- [Quick start](#quick-start) — parse BACS 18 files in three lines
+- [Public API](#public-api) — `load_bacs`, `load_bacs_file`, `summarize_bacs`
+- [BACS 18 Record Layout](#bacs-18-record-layout) — 106-byte column mapping
+- [Transaction Codes](#transaction-codes) — credit, debit, and direct debit codes
+- [Development](#development) — quality gates, tests
+- [Ecosystem](#ecosystem) — modular package suite
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## Installation
+## What is bankstatementparser-loader-bacs?
 
-```bash
-pip install bankstatementparser-loader-bacs
+**BACS Standard 18** is the UK banking standard 106-character fixed-width transmission format for direct debits, direct credits, and Faster Payments processing.
+
+**bankstatementparser-loader-bacs** parses BACS Standard 18 streams and files into unified `bankstatementparser` `Transaction` objects and `pandas.DataFrame` structures.
+
+| Concern | How this loader handles it |
+| :--- | :--- |
+| **Record Models** | Parses Header (VOL1/HDR1), User Header (UHL1), Standard 18 Data Records (106 bytes), and EOF trailers |
+| **Sort Code & Account** | Extracts 6-digit origin/destination sort codes (`XX-XX-XX`) and 8-digit account numbers |
+| **Transaction Codes** | Decodes BACS codes (`99`, `01`, `17`, `18`, `19`, `Z4`, etc.) and determines credit vs debit |
+| **Amounts** | Converts 11-character minor units (pence) to exact `Decimal` (never `float`) |
+
+---
+
+## Install
+
+| Channel | Command | Notes |
+| :--- | :--- | :--- |
+| PyPI | `pip install bankstatementparser-loader-bacs` | Pulls in `bankstatementparser >= 0.0.19` |
+| Source | `git clone https://github.com/sebastienrousseau/bankstatementparser-loader-bacs && cd bankstatementparser-loader-bacs && poetry install` | For local development |
+
+Requires Python 3.10 or later. Compatible with macOS, Linux, and Windows.
+
+<details>
+<summary>Using an isolated virtual environment (recommended)</summary>
+
+```sh
+python -m venv venv
+source venv/bin/activate        # macOS/Linux
+venv\Scripts\activate           # Windows
+python -m pip install -U bankstatementparser-loader-bacs
 ```
 
+</details>
+
 ---
 
-## Quickstart
+
+## Quick start
 
 ```python
 from bankstatementparser_loader_bacs import load_bacs_file, summarize_bacs
 
-# 1. Parse BACS statement into standard Transaction models
-transactions = load_bacs_file("statement.bacs")
+# Parse BACS Standard 18 transmission file
+transactions = load_bacs_file("bacs_transmission.dat")
 for tx in transactions:
     print(f"{tx.booking_date} | {tx.description} | {tx.amount} {tx.currency}")
 
-# 2. Get statement summary metrics
-summary = summarize_bacs(open("statement.bacs").read())
-print(f"SUN: {summary.service_user_number}")
+# Extract transmission batch summary
+summary = summarize_bacs(open("bacs_transmission.dat").read())
+print(f"Total Transactions: {summary.total_transactions}")
 print(f"Total Credit: {summary.total_credit} | Total Debit: {summary.total_debit}")
 ```
 
 ---
+
+## Public API
+
+- `load_bacs(data: str | bytes) -> list[Transaction]`: Ingests BACS string or bytes.
+- `load_bacs_file(file_path: str | Path) -> list[Transaction]`: Ingests local BACS file.
+- `summarize_bacs(data: str | bytes) -> BacsSummary`: Computes batch totals, credit/debit totals, and transaction count.
+- `BacsStatementParser`: Main parser class implementing `parse()` and `to_transactions()`.
+
+---
+
+## BACS 18 Record Layout (106 bytes)
+
+| Columns | Field Name | Description |
+| :--- | :--- | :--- |
+| `1-6` | Originating Sort Code | Sender bank sort code |
+| `7-14` | Originating Account | Sender bank account number |
+| `15-18` | Account Type | Account descriptor |
+| `19-20` | Transaction Code | 2-character BACS operation code (`99`, `01`, `17`, etc.) |
+| `21-26` | Destination Sort Code | Beneficiary bank sort code |
+| `27-34` | Destination Account | Beneficiary account number |
+| `35-38` | Free Format / Type | Record sub-type |
+| `39-49` | Amount | 11-digit unsigned integer amount in pence |
+| `50-67` | Originator Name | Sender entity name |
+| `68-85` | Reference | Payment narrative / reference |
+| `86-103` | Destination Name | Beneficiary entity name |
+| `104-106` | Processing Date | Julian date representation |
+
+---
+
+## Development
+
+The project enforces strict code-quality gates: 100% test and branch coverage, strict type annotations (`mypy`), style linting (`ruff`), docstring coverage (`interrogate`), and security scanning (`bandit`).
+
+```bash
+# Run test suite with branch coverage enforcement
+poetry run pytest
+
+# Type checking and linting
+poetry run mypy .
+poetry run ruff check .
+poetry run ruff format --check .
+
+# Documentation and security gates
+poetry run interrogate -v
+poetry run bandit -r . -c pyproject.toml
+```
+
+---
+
 
 ## Ecosystem
 
@@ -66,6 +169,13 @@ print(f"Total Credit: {summary.total_credit} | Total Debit: {summary.total_debit
 
 ---
 
+## Contributing
+
+Contributions are welcome! Please submit an issue or pull request on GitHub. Ensure that all quality gates pass and test coverage remains at 100%.
+
+---
+
 ## License
 
-Dual-licensed under Apache 2.0 and MIT.
+This project is dual-licensed under the **Apache License 2.0** and the **MIT License**. See [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT) for full details.
+
