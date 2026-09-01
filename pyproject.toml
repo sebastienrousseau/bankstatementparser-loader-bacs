@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bankstatementparser-loader-bacs"
-version = "0.0.1"
+version = "0.0.19"
 description = "BACS Standard 18 / Faster Payments UK banking statement loader for bankstatementparser."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache-2.0 OR MIT"
