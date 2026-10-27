@@ -15,6 +15,7 @@ from typing import Any
 
 import pandas as pd
 from bankstatementparser.base_parser import BankStatementParser
+from bankstatementparser.record_types import SummaryRecord
 from bankstatementparser.transaction_models import Transaction
 
 SOURCE = "bacs"
@@ -65,6 +66,21 @@ class BacsSummary:
     transaction_count: int
     total_credit: Decimal
     total_debit: Decimal
+
+
+class BacsSummaryRecord(SummaryRecord, total=False):
+    """``get_summary()`` result: the core summary keys plus BACS header fields.
+
+    A ``SummaryRecord`` subtype, so the override matches the base parser's
+    contract while keeping every key this loader has always returned.
+    """
+
+    service_user_number: str | None
+    originating_sort_code: str | None
+    originating_account: str | None
+    submission_date: str | None
+    total_credit: float
+    total_debit: float
 
 
 @dataclass
@@ -306,7 +322,7 @@ class BacsStatementParser(BankStatementParser):
         """
         return load_bacs_file(self.file_name)
 
-    def get_summary(self) -> dict[str, Any]:
+    def get_summary(self) -> BacsSummaryRecord:
         """Get summary metadata and balance metrics for the BACS file.
 
         Returns:
