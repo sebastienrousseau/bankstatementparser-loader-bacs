@@ -26,6 +26,11 @@ one version across every package, at 0.0.35.
 - `scripts/verify_versions.py` and the suite's shared
   `tests/test_suite_conformance.py` and `tests/test_release_notes.py`.
 - `.github/dependabot.yml`: weekly pip and GitHub Actions updates.
+- `scripts/check_complexity.py`, the suite's complexity gate, with
+  `scripts/complexity_baseline.json`: per-function ceilings
+  (cyclomatic 10, cognitive 15, Halstead 30, 60 lines; 500 lines per
+  file), run in CI's lint job. Functions already over a ceiling are
+  baselined and may not get worse.
 
 ### Changed
 

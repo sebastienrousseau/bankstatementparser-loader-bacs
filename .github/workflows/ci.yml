@@ -84,5 +84,8 @@ jobs:
       - name: Type check with Mypy
         run: mypy bankstatementparser_loader_bacs tests
 
+      - name: Complexity baseline
+        run: python3 scripts/check_complexity.py
+
       - name: Security audit with Bandit
         run: bandit -r bankstatementparser_loader_bacs -c pyproject.toml
