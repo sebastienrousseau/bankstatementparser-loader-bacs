@@ -31,6 +31,9 @@ one version across every package, at 0.0.35.
   (cyclomatic 10, cognitive 15, Halstead 30, 60 lines; 500 lines per
   file), run in CI's lint job. Functions already over a ceiling are
   baselined and may not get worse.
+- `.github/workflows/codeql.yml`: CodeQL as an advanced setup for
+  Python and GitHub Actions, on pushes and pull requests to `main`
+  and weekly.
 
 ### Changed
 
