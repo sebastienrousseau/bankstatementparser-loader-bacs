@@ -18,7 +18,7 @@ std18 = "bankstatementparser_loader_bacs.loader:BacsStatementParser"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-bankstatementparser = ">=0.0.18"
+bankstatementparser = ">=0.0.34"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.0.0,<10.0.0"
