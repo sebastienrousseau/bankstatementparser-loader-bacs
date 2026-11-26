@@ -80,4 +80,4 @@ color = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=bankstatementparser_loader_bacs --cov-report=term-missing --cov-report=xml --cov-fail-under=100"
+addopts = "--cov=bankstatementparser_loader_bacs --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=100"
