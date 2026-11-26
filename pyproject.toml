@@ -40,9 +40,19 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
+# The vendored conformance test carries a sha256 of its own bytes.
+# It is maintained centrally in the core; letting ruff rewrite
+# it here invalidates the very check it exists to make. Same
+# exclusion as the core.
 line-length = 79
 target-version = "py310"
-extend-exclude = ["*.md", "tmp_env", ".venv", ".eggs"]
+extend-exclude = [
+    "*.md",
+    "tmp_env",
+    ".venv",
+    ".eggs",
+    "tests/test_suite_conformance.py",
+]
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "C4", "UP"]
