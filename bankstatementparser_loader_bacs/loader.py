@@ -109,36 +109,60 @@ def _handle_uhl1_header(raw: str, state: _BacsState) -> None:
         state.sun = raw[10:16].strip()
 
 
-def _handle_detail_18(raw: str, state: _BacsState) -> None:
-    """Parse BACS Standard 18 transaction line."""
-    dest_sort = raw[0:6].strip()
-    dest_acct = raw[6:14].strip()
-    tx_code = raw[15:17].strip() if len(raw) >= 17 else "99"
-    orig_sort = raw[17:23].strip() if len(raw) >= 23 else state.orig_sort
-    orig_acct = raw[23:31].strip() if len(raw) >= 31 else state.orig_acct
+def _field(raw: str, start: int, end: int, default: str = "") -> str:
+    """Return ``raw[start:end]`` stripped, or ``default`` if ``raw`` is short.
 
+    A line shorter than ``end`` characters does not carry the field.
+    """
+    return raw[start:end].strip() if len(raw) >= end else default
+
+
+def _remember_originator(
+    state: _BacsState, orig_sort: str, orig_acct: str
+) -> None:
+    """Keep the first non-empty originating sort code and account."""
     if not state.orig_sort and orig_sort:
         state.orig_sort = orig_sort
     if not state.orig_acct and orig_acct:
         state.orig_acct = orig_acct
 
-    raw_amt = raw[35:46].strip() if len(raw) >= 46 else ""
-    is_debit = tx_code in _DEBIT_CODES
-    amount = _decode_bacs_amount(raw_amt, is_debit)
 
-    orig_name = raw[46:64].strip() if len(raw) >= 64 else ""
-    ref = raw[64:82].strip() if len(raw) >= 82 else ""
-    dest_name = raw[82:100].strip() if len(raw) >= 100 else ""
-    proc_date_raw = raw[100:106].strip() if len(raw) >= 106 else ""
-    proc_date = (
-        _parse_julian_or_gregorian_date(proc_date_raw) or state.sub_date
-    )
-
+def _describe(is_debit: bool, orig_name: str, dest_name: str, ref: str) -> str:
+    """Build a transaction description, suffixed with the reference."""
     description = (
         dest_name if is_debit else (orig_name or dest_name or "BACS Transfer")
     )
     if ref and ref not in description:
         description = f"{description} - {ref}".strip()
+    return description
+
+
+def _account_id(dest_sort: str, dest_acct: str, orig_acct: str) -> str:
+    """Return ``sort-account`` for the destination, else a fallback id."""
+    if dest_sort and dest_acct:
+        return f"{dest_sort}-{dest_acct}"
+    return orig_acct or "BACS"
+
+
+def _handle_detail_18(raw: str, state: _BacsState) -> None:
+    """Parse BACS Standard 18 transaction line."""
+    dest_sort = raw[0:6].strip()
+    dest_acct = raw[6:14].strip()
+    tx_code = _field(raw, 15, 17, "99")
+    orig_sort = _field(raw, 17, 23, state.orig_sort)
+    orig_acct = _field(raw, 23, 31, state.orig_acct)
+    _remember_originator(state, orig_sort, orig_acct)
+
+    is_debit = tx_code in _DEBIT_CODES
+    amount = _decode_bacs_amount(_field(raw, 35, 46), is_debit)
+
+    orig_name = _field(raw, 46, 64)
+    ref = _field(raw, 64, 82)
+    dest_name = _field(raw, 82, 100)
+    proc_date = (
+        _parse_julian_or_gregorian_date(_field(raw, 100, 106))
+        or state.sub_date
+    )
 
     state.records.append(
         {
@@ -146,14 +170,12 @@ def _handle_detail_18(raw: str, state: _BacsState) -> None:
             "destination_account": dest_acct,
             "originating_sort_code": orig_sort,
             "originating_account": orig_acct,
-            "account_id": f"{dest_sort}-{dest_acct}"
-            if dest_sort and dest_acct
-            else (orig_acct or "BACS"),
+            "account_id": _account_id(dest_sort, dest_acct, orig_acct),
             "currency": state.currency,
             "amount": amount,
             "booking_date": proc_date,
             "value_date": proc_date,
-            "description": description,
+            "description": _describe(is_debit, orig_name, dest_name, ref),
             "reference": ref or None,
             "tx_code": tx_code,
             "counterparty": orig_name if is_debit else dest_name,

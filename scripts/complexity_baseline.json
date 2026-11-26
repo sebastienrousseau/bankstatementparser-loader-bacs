@@ -1,8 +1,4 @@
 {
-  "bankstatementparser_loader_bacs/loader.py::_handle_detail_18": {
-    "cognitive": 22,
-    "cyclomatic": 24
-  },
   "tests/test_loader.py::test_bacs_statement_parser_class": {
     "cyclomatic": 11
   },
