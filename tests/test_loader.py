@@ -22,6 +22,7 @@ from bankstatementparser_loader_bacs import (
     summarize_bacs,
 )
 from bankstatementparser_loader_bacs.loader import (
+    _BacsState,
     _decode_bacs_amount,
     _parse_bacs_stream,
     _parse_julian_or_gregorian_date,
@@ -76,7 +77,7 @@ def _sample_bacs_18_text() -> str:
 
 def test_version() -> None:
     """Verifies that version is exposed and semantic."""
-    assert __version__ == "0.0.19"
+    assert __version__ == "0.0.35"
 
 
 def test_load_bacs_stream() -> None:
@@ -205,3 +206,59 @@ def test_fuzz_bacs_amount(amount_int: int, is_debit: bool) -> None:
     raw = f"{amount_int:011d}"
     val = _decode_bacs_amount(raw, is_debit)
     assert isinstance(val, Decimal)
+
+
+def test_state_keeps_records_it_is_given() -> None:
+    """A records list passed in is kept, not replaced by an empty one."""
+    seed = [{"amount": Decimal("1.00")}]
+    state = _BacsState(records=seed)
+    assert state.records is seed
+
+
+def test_short_uhl1_headers_leave_fields_unset() -> None:
+    """A UHL1 too short for a date or a user number sets neither."""
+    too_short_for_date = _parse_bacs_stream(["UHL1 26"])
+    assert too_short_for_date.sub_date is None
+    assert too_short_for_date.sun == ""
+
+    date_only = _parse_bacs_stream(["UHL1 26015 "])
+    assert date_only.sub_date == date(2026, 1, 15)
+    assert date_only.sun == ""
+
+
+def test_lines_that_are_not_records_are_skipped() -> None:
+    """A line that is neither a label nor a numeric record is ignored."""
+    state = _parse_bacs_stream(["NOTE this line is free text, not a record"])
+    assert state.records == []
+
+
+def test_reference_already_in_description_is_not_repeated() -> None:
+    """The reference is appended to the description only when missing."""
+    record = (
+        "200000"
+        "12345678"
+        "0"
+        "17"
+        "400000"
+        "87654321"
+        "    "
+        "00000001000"
+        "ACME CORP LTD     "
+        "GAS               "
+        "GAS BOARD         "
+        "26015 "
+    )
+    (tx,) = load_bacs(record)
+    assert tx.description == "GAS BOARD"
+    assert tx.reference == "GAS"
+
+
+def test_summary_is_read_once_and_cached(tmp_path: Path) -> None:
+    """A second get_summary() call reuses the first result."""
+    sample_file = tmp_path / "statement.bacs"
+    sample_file.write_text(_sample_bacs_18_text(), encoding="utf-8")
+    parser = BacsStatementParser(sample_file)
+
+    first = parser.get_summary()
+    sample_file.unlink()
+    assert parser.get_summary() == first

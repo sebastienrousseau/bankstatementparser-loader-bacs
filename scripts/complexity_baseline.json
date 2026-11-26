@@ -1,0 +1,15 @@
+{
+  "tests/test_loader.py::test_bacs_statement_parser_class": {
+    "cyclomatic": 11
+  },
+  "tests/test_loader.py::test_load_bacs_stream": {
+    "cyclomatic": 21
+  },
+  "tests/test_suite_conformance.py": {
+    "file_lines": 678
+  },
+  "tests/test_suite_conformance.py::_dev_spec": {
+    "cognitive": 23,
+    "cyclomatic": 12
+  }
+}

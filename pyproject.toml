@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bankstatementparser-loader-bacs"
-version = "0.0.19"
+version = "0.0.35"
 description = "BACS Standard 18 / Faster Payments UK banking statement loader for bankstatementparser."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache-2.0 OR MIT"
@@ -18,10 +18,10 @@ std18 = "bankstatementparser_loader_bacs.loader:BacsStatementParser"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-bankstatementparser = ">=0.0.18"
+bankstatementparser = ">=0.0.34"
 
 [tool.poetry.group.dev.dependencies]
-pytest = ">=8.0.0,<10.0.0"
+pytest = ">=9.0.3,<10.0.0"
 pytest-cov = "^7.1.0"
 pytest-benchmark = "^5.1.0"
 ruff = ">=0.15.7,<0.17"
@@ -29,15 +29,30 @@ mypy = ">=1.5,<3"
 bandit = "^1.7.0"
 hypothesis = ">=6.82,<7"
 interrogate = "^1.7.0"
+# tests/test_suite_conformance.py parses pyproject.toml. tomllib is
+# stdlib only from 3.11 and the suite floor is 3.10, so without the
+# backport the conformance gate does not run there at all.
+tomli = { version = ">=2", python = "<3.11" }
+packaging = ">=23"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
+# The vendored conformance test carries a sha256 of its own bytes.
+# It is maintained centrally in the core; letting ruff rewrite
+# it here invalidates the very check it exists to make. Same
+# exclusion as the core.
 line-length = 79
 target-version = "py310"
-extend-exclude = ["*.md", "tmp_env", ".venv", ".eggs"]
+extend-exclude = [
+    "*.md",
+    "tmp_env",
+    ".venv",
+    ".eggs",
+    "tests/test_suite_conformance.py",
+]
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "C4", "UP"]
@@ -80,4 +95,4 @@ color = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=bankstatementparser_loader_bacs --cov-report=term-missing --cov-report=xml --cov-fail-under=100"
+addopts = "--cov=bankstatementparser_loader_bacs --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=100"
