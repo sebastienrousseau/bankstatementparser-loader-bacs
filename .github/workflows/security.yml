@@ -1,0 +1,67 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly bandit + dependency audit (Monday 04:00 UTC), so an advisory
+    # published against a locked dependency fails without a code change.
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  bandit:
+    name: Bandit (static analysis)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install locked dev tools (bandit)
+        run: pip install --require-hashes -r requirements/ci.txt
+
+      - name: Run bandit
+        run: bandit -r bankstatementparser_loader_bacs -c pyproject.toml
+
+  pip-audit:
+    name: pip-audit (vulnerable dependencies)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install locked dev tools (pip-audit)
+        run: pip install --require-hashes -r requirements/ci.txt
+
+      # Audits every locked set: what ships (runtime), what CI runs
+      # (dev), the manual, the fuzzer and the release tooling, rather
+      # than whatever the runner happens to have installed. Any
+      # advisory fails the job.
+      - name: Audit locked requirements
+        run: |
+          for f in runtime ci docs fuzz build sbom; do
+            echo "== requirements/$f.txt"
+            pip-audit --require-hashes --disable-pip -r "requirements/$f.txt"
+          done

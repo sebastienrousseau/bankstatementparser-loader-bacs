@@ -12,3 +12,15 @@ build/
 .mypy_cache/
 .ruff_cache/
 .DS_Store
+.benchmarks/
+.hypothesis/
+
+# libFuzzer working corpus and reproducers from fuzz/fuzz_load_bacs.py
+.fuzz-corpus/
+crash-*
+leak-*
+timeout-*
+oom-*
+
+# MkDocs build output
+site/
