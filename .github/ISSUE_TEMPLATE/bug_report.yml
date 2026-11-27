@@ -1,0 +1,70 @@
+name: Bug Report
+description: Report a reproducible problem in bankstatementparser-loader-bacs
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: bankstatementparser-loader-bacs Version
+      placeholder: "0.0.10"
+    validations:
+      required: true
+  - type: input
+    id: bankstatementparser_version
+    attributes:
+      label: bankstatementparser Version
+      placeholder: "0.0.10"
+    validations:
+      required: true
+  - type: dropdown
+    id: python_version
+    attributes:
+      label: Python Version
+      options:
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        - "3.13"
+        - "3.14"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Linux
+        - macOS
+        - Windows
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: document
+    attributes:
+      label: BACS Input
+      description: |
+        The smallest Standard 18 text that shows the problem (redact any
+        sensitive account numbers or balances - placeholder data is fine).
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: error_output
+    attributes:
+      label: Output Or Error
+      description: The transactions you got (or expected), or the stack trace.
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything Else
+      description: Logs, how the file was produced (bank, system), etc.
