@@ -8,4 +8,4 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in `bankstatementparser-loader-bacs`, please report it responsibly by emailing **sebastian.rousseau@gmail.com** or creating a private security advisory on GitHub.
+If you discover a security vulnerability in `bankstatementparser-loader-bacs`, please report it responsibly by emailing **<sebastian.rousseau@gmail.com>** or creating a private security advisory on GitHub.

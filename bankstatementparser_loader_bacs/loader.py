@@ -24,10 +24,20 @@ SOURCE = "bacs"
 # Debits: 01 (Direct Debit), 17 (Direct Debit regular), 18 (Direct Debit representation), 19 (Direct Debit final)
 _DEBIT_CODES = {"01", "17", "18", "19"}
 
+# Standard 18 numeric fields hold ASCII digits. ``str.isdigit`` is also
+# true for superscripts and other scripts' digits, which ``int`` and
+# ``Decimal`` refuse or misread, so the loader tests membership here.
+_ASCII_DIGITS = frozenset("0123456789")
+
+
+def _is_ascii_digits(text: str) -> bool:
+    """Return whether ``text`` is non-empty and all ASCII digits."""
+    return bool(text) and all(ch in _ASCII_DIGITS for ch in text)
+
 
 def _decode_bacs_amount(raw_pence: str, is_debit: bool) -> Decimal:
     """Convert raw 11-digit pence string to signed Decimal."""
-    clean = "".join(ch for ch in raw_pence if ch.isdigit())
+    clean = "".join(ch for ch in raw_pence if ch in _ASCII_DIGITS)
     if not clean:
         return Decimal("0.00")
     pence = Decimal(clean)
@@ -38,14 +48,14 @@ def _decode_bacs_amount(raw_pence: str, is_debit: bool) -> Decimal:
 def _parse_julian_or_gregorian_date(raw: str) -> date | None:
     """Parse BACS date formatted as YYDDD (Julian) or DDMMYY / YYMMDD."""
     clean = raw.strip()
-    if len(clean) == 5 and clean.isdigit():
+    if len(clean) == 5 and _is_ascii_digits(clean):
         year = 2000 + int(clean[:2])
         day_of_year = int(clean[2:])
         if not (1 <= day_of_year <= 366):
             return None
         res = date.fromordinal(date(year, 1, 1).toordinal() + day_of_year - 1)
         return res if res.year == year else None
-    if len(clean) == 6 and clean.isdigit():
+    if len(clean) == 6 and _is_ascii_digits(clean):
         for fmt in ("%d%m%y", "%y%m%d"):
             try:
                 return datetime.strptime(clean, fmt).date()

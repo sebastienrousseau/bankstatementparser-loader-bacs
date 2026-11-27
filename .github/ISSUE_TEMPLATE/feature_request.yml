@@ -1,0 +1,51 @@
+name: Feature Request
+description: Suggest a Standard 18 record, field or behaviour for bankstatementparser-loader-bacs
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: |
+        What can't you do today with bankstatementparser-loader-bacs? If this surfaces an
+        existing bankstatementparser helper, link to it.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: |
+        Sketch the change: the Standard 18 record or field, how it should map
+        to a Transaction, and any new function or argument. Reference the parent bankstatementparser API surface where
+        relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Real-World Use Case
+      description: Which bank or system produces the files, and what do you do with the result?
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Area
+      options:
+        - Record support
+        - Transaction mapping
+        - Summary
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+  - type: textarea
+    id: contribution
+    attributes:
+      label: Willingness To Contribute
+      description: Could you take a stab at the implementation or tests?
