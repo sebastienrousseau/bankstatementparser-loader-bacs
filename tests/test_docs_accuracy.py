@@ -3,8 +3,8 @@
 
 """The documented Standard 18 record layout matches what the loader reads.
 
-Every row of the layout table (``| `start-end` | Field | ... |``) in each
-document below is checked against the parser: the documented columns of
+Every row of the layout table (``| `start-end` | Field | ... |``) in the
+README is checked against the parser: the documented columns of
 one detail line are overwritten with a marker, and the field the row
 names must come back as that marker. A row for a field the loader skips
 must leave the parsed record unchanged. A row naming a field this test
@@ -25,7 +25,9 @@ import pytest
 from bankstatementparser_loader_bacs.loader import _parse_bacs_stream
 
 ROOT = Path(__file__).resolve().parent.parent
-DOCUMENTS = [ROOT / "README.md", ROOT / "docs" / "format.md"]
+# docs/format.md includes the README's Features section verbatim
+# (pymdownx.snippets), so the README's table is the manual's too.
+DOCUMENTS = [ROOT / "README.md"]
 
 _ROW = re.compile(r"^\|\s*`(\d+)(?:-(\d+))?`\s*\|\s*([^|]+?)\s*\|", re.M)
 
@@ -129,8 +131,6 @@ def _rows(document: Path) -> list[tuple[int, int, str]]:
 )
 def test_layout_table_matches_the_loader(document: Path) -> None:
     """Each documented column range carries the field it is named for."""
-    if not document.exists():
-        pytest.skip(f"{document.name} not present")
     rows = _rows(document)
     assert rows, f"{document.name} has no record layout table"
     baseline = _parse(_BASE)
@@ -150,3 +150,23 @@ def test_layout_table_matches_the_loader(document: Path) -> None:
             assert _CHECKS[field][1](record, marker), (
                 f"{document.name}: {field!r} is not at columns {start}-{end}"
             )
+
+
+def _python_blocks(document: Path) -> list[str]:
+    """The fenced ``python`` blocks of a document."""
+    text = document.read_text(encoding="utf-8")
+    return re.findall(r"```python\n(.*?)```", text, re.S)
+
+
+def test_readme_quick_start_prints_what_it_says(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The in-memory Quick Start runs and prints its ``# `` comments."""
+    (block,) = [
+        b for b in _python_blocks(ROOT / "README.md") if "payload" in b
+    ]
+    expected = [
+        line[2:] for line in block.splitlines() if line.startswith("# ")
+    ]
+    exec(compile(block, "README.md", "exec"), {})
+    assert capsys.readouterr().out.splitlines() == expected
