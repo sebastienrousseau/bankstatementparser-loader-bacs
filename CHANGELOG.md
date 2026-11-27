@@ -7,6 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.36] - 2026-11-27
+
+### Fixed
+
+- A non-ASCII digit (a superscript such as `²`, or another script's
+  digits) in a Standard 18 amount or date no longer aborts the load.
+  Numeric fields count ASCII `0`-`9` only: an amount keeps its ASCII
+  digits, as it already kept them past spaces, and a date with any
+  other character does not parse, so a detail record falls back to the
+  `UHL1` date. Before, `load_bacs` and `summarize_bacs` raised
+  `decimal.InvalidOperation` or `ValueError`.
+- The README's record layout table had the originating and destination
+  fields swapped and every later column shifted: the destination sort
+  code and account are at columns 1-14, the originating ones at 18-31
+  and the amount at 36-46. `tests/test_docs_accuracy.py` now checks
+  every row of the table against the parser.
+- The examples built their sample detail record one column out of
+  place, so they printed a misread description and originator. They
+  now build records field by field.
+
+### Added
+
+- An Atheris fuzz target, `fuzz/fuzz_load_bacs.py`, for `load_bacs`
+  and `summarize_bacs`, with a seed corpus; it fails on any exception,
+  a malformed `Transaction` or a summary that disagrees with the load.
+  CI runs it for 120 s on every change; `make fuzz` locally.
+- `benches/bench_load_bacs.py`, a real benchmark of `load_bacs` and
+  `summarize_bacs` on files of 10 to 50,000 records, replacing a file
+  that timed an empty loop. CI runs `--quick`; `docs/BENCHMARKS.md`
+  records a full run with its environment.
+- `tests/fixtures/standard18.bacs`, a whole Standard 18 file, with a
+  golden test.
+- A `Makefile` wrapping the local gates (`make check`).
+- A MkDocs Material user manual (`mkdocs.yml`, `docs/`) with an
+  mkdocstrings API reference, built with `--strict` on every pull
+  request and deployed to GitHub Pages from `main`
+  (`.github/workflows/docs.yml`, `make docs`). It replaces a Sphinx
+  configuration that nothing built.
+- `ARCHITECTURE.md`, `CODE_OF_CONDUCT.md`, `docs/POLICIES.md`,
+  `docs/BENCHMARKS.md`, `docs/COMPARISON.md`, `docs/format.md` and
+  `docs/suite.md`.
+- Signed releases: keyless cosign `.sig` and `.pem` per distribution,
+  SLSA provenance
+  (`bankstatementparser-loader-bacs-vX.Y.Z.intoto.jsonl`,
+  slsa-github-generator 2.1.0), CycloneDX and SPDX SBOMs and a licence
+  manifest on every GitHub release, and PEP 740 attestations on PyPI.
+- The OpenSSF Scorecard workflow, the suite's Docs Lint workflow
+  (`scripts/readme-check.sh` and markdownlint), a Security workflow
+  (Bandit and `pip-audit` on every locked set), the portfolio pull
+  request and issue templates, and `.github/demo.gif` rendered by
+  `make demo` from `.github/demo.tape`.
+- Hash-pinned requirement sets exported from the lock
+  (`requirements/{runtime,ci,fuzz,docs}.txt`, by the suite's
+  `scripts/export_locked_requirements.py`) and compiled release tooling
+  (`requirements/{build,sbom}.txt`).
+
+### Changed
+
+- Require `bankstatementparser >= 0.0.35`, the newest core release, and
+  align the version with the suite's 0.0.36 release; `poetry.lock`
+  moves core to 0.0.35.
+- Dev tools: ruff 0.17.6, mypy 2.4.1, pytest 9.2.0, hypothesis 6.168.5,
+  tomli 2.5.0 and pytest-benchmark 5.3.1 (Dependabot #4 to #9).
+- CI pins every action by commit SHA, installs only the hashed lock
+  exports, and tests CPython 3.10 to 3.14 on Ubuntu, macOS and Windows.
+  Write permissions sit on the jobs that need them.
+- `README.md` follows the portfolio template; its Quick Start is run
+  by the tests. The suite table moves to `docs/suite.md`.
+  `CONTRIBUTING.md` describes the steps that work in this repository.
+
 ## [0.0.35] - 2026-11-26
 
 The first release on PyPI. Versions 0.0.20 to 0.0.34 were never
