@@ -110,18 +110,18 @@ print(f"Total Credit: {summary.total_credit} | Total Debit: {summary.total_debit
 
 | Columns | Field Name | Description |
 | :--- | :--- | :--- |
-| `1-6` | Originating Sort Code | Sender bank sort code |
-| `7-14` | Originating Account | Sender bank account number |
-| `15-18` | Account Type | Account descriptor |
-| `19-20` | Transaction Code | 2-character BACS operation code (`99`, `01`, `17`, etc.) |
-| `21-26` | Destination Sort Code | Beneficiary bank sort code |
-| `27-34` | Destination Account | Beneficiary account number |
-| `35-38` | Free Format / Type | Record sub-type |
-| `39-49` | Amount | 11-digit unsigned integer amount in pence |
-| `50-67` | Originator Name | Sender entity name |
-| `68-85` | Reference | Payment narrative / reference |
-| `86-103` | Destination Name | Beneficiary entity name |
-| `104-106` | Processing Date | Julian date representation |
+| `1-6` | Destination Sort Code | Beneficiary bank sort code |
+| `7-14` | Destination Account | Beneficiary account number |
+| `15` | Destination Account Type | Account type digit (not read) |
+| `16-17` | Transaction Code | 2-character BACS operation code (`99`, `01`, `17`, etc.) |
+| `18-23` | Originating Sort Code | Service user's (sender's) sort code |
+| `24-31` | Originating Account | Service user's account number |
+| `32-35` | Free Format | Not read |
+| `36-46` | Amount | 11-digit unsigned integer amount in pence |
+| `47-64` | Originator Name | Service user's name |
+| `65-82` | Reference | Payment narrative / reference |
+| `83-100` | Destination Name | Beneficiary account name |
+| `101-106` | Processing Date | Optional: `YYDDD` (Julian), `DDMMYY` or `YYMMDD`; else the UHL1 date |
 
 ---
 
