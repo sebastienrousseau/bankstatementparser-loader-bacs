@@ -17,7 +17,7 @@ from .loader import (
     summarize_bacs,
 )
 
-__version__ = "0.0.36"
+__version__ = "0.0.37"
 __all__ = [
     "BacsStatementParser",
     "BacsSummary",

@@ -76,7 +76,7 @@ Verify the installation:
 
 ```sh
 python -c "import bankstatementparser_loader_bacs as b; print(b.__version__)"
-# -> 0.0.36
+# -> 0.0.37
 ```
 
 An isolated virtual environment keeps the loader's dependencies apart:
