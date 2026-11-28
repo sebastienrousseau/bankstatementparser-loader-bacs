@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sebastienrousseau/bankstatementparser-loader-bacs/main/.github/demo.gif" alt="A terminal printing bankstatementparser-loader-bacs 0.0.36, the repository's Standard 18 fixture, then the 01_basic_usage.py example loading a credit and two Direct Debits and summarising the file" width="100%" />
+  <img src="https://raw.githubusercontent.com/sebastienrousseau/bankstatementparser-loader-bacs/main/.github/demo.gif" alt="A terminal printing bankstatementparser-loader-bacs 0.0.37, the repository's Standard 18 fixture, then the 01_basic_usage.py example loading a credit and two Direct Debits and summarising the file" width="100%" />
 </p>
 
 ---
@@ -65,18 +65,18 @@
 pip install bankstatementparser-loader-bacs
 ```
 
-That installs the loader and `bankstatementparser >= 0.0.35`, which brings `pandas` and `pydantic`.
+That installs the loader and `bankstatementparser >= 0.0.36`, which brings `pandas` and `pydantic`.
 
 | Channel | Command | Notes |
 | :--- | :--- | :--- |
-| PyPI | `pip install bankstatementparser-loader-bacs` | Pulls in `bankstatementparser >= 0.0.35` |
+| PyPI | `pip install bankstatementparser-loader-bacs` | Pulls in `bankstatementparser >= 0.0.36` |
 | Source | `git clone https://github.com/sebastienrousseau/bankstatementparser-loader-bacs && cd bankstatementparser-loader-bacs && poetry install` | For development |
 
 Verify the installation:
 
 ```sh
 python -c "import bankstatementparser_loader_bacs as b; print(b.__version__)"
-# -> 0.0.36
+# -> 0.0.37
 ```
 
 An isolated virtual environment keeps the loader's dependencies apart:
@@ -93,7 +93,7 @@ python -m pip install -U bankstatementparser-loader-bacs
 ## Requirements
 
 - **Python 3.10 or later.** CI tests CPython 3.10, 3.11, 3.12, 3.13 and 3.14 on Linux, macOS and Windows; [`docs/POLICIES.md`](docs/POLICIES.md) says when the floor moves.
-- **[`bankstatementparser`](https://pypi.org/project/bankstatementparser/) 0.0.35 or later**, whose `Transaction` model and `BankStatementParser` base class the loader produces and extends.
+- **[`bankstatementparser`](https://pypi.org/project/bankstatementparser/) 0.0.36 or later**, whose `Transaction` model and `BankStatementParser` base class the loader produces and extends.
 - No network access, native extensions or system packages of its own.
 
 ---
