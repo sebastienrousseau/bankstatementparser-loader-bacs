@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sebastienrousseau/bankstatementparser-loader-bacs/main/.github/demo.gif" alt="A terminal printing bankstatementparser-loader-bacs 0.0.36, the repository's Standard 18 fixture, then the 01_basic_usage.py example loading a credit and two Direct Debits and summarising the file" width="100%" />
+  <img src="https://raw.githubusercontent.com/sebastienrousseau/bankstatementparser-loader-bacs/main/.github/demo.gif" alt="A terminal printing bankstatementparser-loader-bacs 0.0.37, the repository's Standard 18 fixture, then the 01_basic_usage.py example loading a credit and two Direct Debits and summarising the file" width="100%" />
 </p>
 
 ---
