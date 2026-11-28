@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Require `bankstatementparser >= 0.0.36`, the newest core release, and
+  align the version with the suite's 0.0.37 release; `poetry.lock`
+  moves core to 0.0.36.
 - CI: four pinned actions move to their latest releases:
   codeql-action 4.39.5, markdownlint-cli2-action 25.1.0,
   cosign-installer 4.1.4 and sbom-action 0.24.4.
